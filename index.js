@@ -40,6 +40,7 @@ const replaceTemplate = (temp, product) => {
   output = output.replace(/{%NUTRIENTS%}/g, product.nutrients);
   output = output.replace(/{%QUANTITY%}/g, product.quantity);
   output = output.replace(/{%ID%}/g, product.id);
+  output = output.replace(/{%DESC%}/g, product.description);
   if (!product.organic)
     output = output.replace(/{%NOT_ORGANIC%}/g, "not-organic");
 
@@ -56,7 +57,12 @@ const server = http.createServer((req, response) => {
   //console.log(req);
 
   //overview page
-  if (req.url === "/overview" || req.url === "/") {
+  const { pathname, query } = url.parse(req.url, true);
+
+  console.log(query);
+  console.log(pathname);
+
+  if (pathname === "/overview" || pathname === "/") {
     response.writeHead(200, {
       "Content-type": "text/html",
     });
@@ -68,11 +74,19 @@ const server = http.createServer((req, response) => {
   }
 
   //api page
-  else if (req.url === "/api") {
+  else if (pathname === "/api") {
     response.writeHead(200, {
       "content-type": "application/json",
     });
     response.end(data);
+  } else if (pathname === "/product") {
+    const temp = dataObj[query.id];
+
+    output = replaceTemplate(product, temp);
+    response.writeHead(200, {
+      "Content-type": "text/html",
+    });
+    response.end(output);
   }
 
   //not found page
